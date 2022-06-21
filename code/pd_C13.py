@@ -40,8 +40,7 @@ import statsmodels.formula.api as smf
 
 acs.columns
 
-# model=smf.logit('ge150k_i~HouseCosts+NumWorkers+OwnRent+NumBedrooms+FamilyType',data=acs)
-model=smf.logit('ge150k~HouseCosts+NumWorkers+OwnRent+NumBedrooms+FamilyType',data=acs)
+model=smf.logit('ge150k_i~HouseCosts+NumWorkers+OwnRent+NumBedrooms+FamilyType',data=acs)
 result=model.fit()
 result.summary()
 
@@ -120,11 +119,11 @@ b=bladder.stop.value_counts().sort_index()
 c=b.sum()-b.cumsum()
 c
 c.plot()
-
-
+bladder.dtypes
 
 #*******生存分析********
 #生存分析
+#这里的变量都是数值型
 from lifelines import KaplanMeierFitter
 kmf=KaplanMeierFitter()
 kmf.fit(durations=bladder.stop,event_observed=bladder.event)

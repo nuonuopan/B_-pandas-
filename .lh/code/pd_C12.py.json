@@ -1,0 +1,18 @@
+{
+    "sourceFile": "code/pd_C12.py",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1655807861394,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1655807861394,
+            "name": "Commit-0",
+            "content": "# C12 线性模型\r\n\r\n\r\n# 12.2 单变量线性回归\r\n# 12.2.1 使用统计模型库statsmodels\r\nimport pandas as pd\r\nimport seaborn as sns\r\n\r\ntips = pd.read_csv(r\"F:\\Learn\\B_活用pandas库\\data\\seaborn-data\\tips.csv\")\r\ntips.head()\r\ntips.dtypes  # 查看变量类型\r\nimport statsmodels.formula.api as smf\r\n\r\nmodel = smf.ols(formula=\"tip~total_bill\", data=tips)  # 指定模型\r\nresult = model.fit()  # 拟合数据\r\nresult.summary()  # 结果\r\nresult.params  # 参数\r\nresult.conf_int()  # 置信区间，值在 [0.025,0.975]直接\r\n# 12.2.2 使用sklearn库\r\nfrom sklearn import linear_model\r\n\r\nlr = linear_model.LinearRegression()  # 创建线性回归对象\r\npredicted = lr.fit(X=tips[\"total_bill\"].values.reshape(-1, 1), y=tips[\"tip\"])  # 数据拟合\r\n# type(tips['total_bill'].values)\r\n# tips['total_bill'].values.reshape(-1,1).shape\r\n# tips['total_bill'].values.shape\r\n\r\npredicted.coef_\r\npredicted.intercept_\r\n\r\n#%%\r\n# 12.3 多元回归\r\n# 多个数值自变量：①多个数值自变量②数值+分类自变量\r\n# 12.3.1 使用统计模型库statsmodels\r\nmodel = smf.ols(formula=\"tip~total_bill+size\", data=tips)  # 指定模型\r\nresult = model.fit()  # 拟合数据\r\nresult.summary()  # 结果\r\n# 每个参数的解释都是在“在所以其他变量保持不变的情况下，xx每增加一个单位，tip增加xx”\r\n\r\n# 多个自变量，可以包含分类变量\r\ntips = pd.read_csv(r\"F:\\Learn\\B_活用pandas库\\data\\seaborn-data\\tips.csv\")\r\ntips.info()\r\n# sex\\smoker\\day\\time都可以转换成category\r\n# 转换为category类型\r\ntips.sex = tips.sex.astype(\"category\")\r\ntips.smoker = tips.smoker.astype(\"category\")\r\ntips.day = tips.day.astype(\"category\")\r\ntips.time = tips.time.astype(\"category\")\r\ntips.info()\r\ntips.sex.unique()  # 查看变量可能取值\r\ntips.day.unique()  # 查看变量可能取值\r\n# 对分类变量建模时，必须创建虚拟变量，即分类中的每个唯一值都变成了新的二元特征；eg：Female or Male\r\n# statsmodels会自动创建虚拟变量,并删除参考变量来避免多重共线性\r\n# 为了避免多重共线性，通常会删除其中一个虚拟变量，比如Female和Male，可以知道不是男性就是女性，在这种情况下可以删除代表男性的虚拟变量\r\n\r\nmodel = smf.ols(formula=\"tip~total_bill+size+sex+smoker+day+time\", data=tips)  # 指定模型\r\nresult = model.fit()  # 拟合数据\r\nresult.summary()  # 结果\r\n# 结果显示 sex[T.Male],代表删除的参考变量是Female，解释为：当sex从Female变成Male时，tip减少了0.0342\r\n\r\n#%%\r\n# 12.3.3 使用sklearn\r\n# 多元线性回归不用重塑X值了\r\nlr = linear_model.LinearRegression()  # 创建线性回归对象\r\npredicted = lr.fit(X=tips[[\"total_bill\", \"size\"]], y=tips[\"tip\"])\r\npredicted.coef_\r\npredicted.intercept_\r\n# 多个自变量，可以包含分类变量\r\n# 必须为sklearn手动创建虚拟变量\r\n# pandas的get_dummies可以实现，自动把所以分类变量转换为虚拟变量\r\ntips_dummy = pd.get_dummies(tips)\r\ntips_dummy_drop = pd.get_dummies(tips, drop_first=True)  # 删除参考变量\r\ndel tips_dummy_drop[\"tip\"]  # 不要把因变量也带进来\r\npredicted = lr.fit(X=tips_dummy_drop, y=tips[\"tip\"])\r\npredicted.coef_\r\npredicted.intercept_\r\n# 12.4 保留sklearn索引\r\n# sklearn模型的系数不带标签，可以收到存储标签，并添加系数\r\nimport numpy as np\r\n\r\nlr = linear_model.LinearRegression()\r\npredicted = lr.fit(X=tips_dummy_drop, y=tips[\"tip\"])\r\n# 获取截距及其他系数\r\nvalues = np.append(predicted.intercept_, predicted.coef_)\r\nnames = np.append(\"intercept\", tips_dummy_drop.columns)\r\na = pd.Series(values, index=names)\r\nprint(a)\r\nb = pd.DataFrame(values, index=names, columns=[\"coef\"])\r\nb\r\n\r\n"
+        }
+    ]
+}
